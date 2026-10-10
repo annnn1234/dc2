@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자유 갤러리</title>
+<style>
+/* DC Board (HTML 단일 파일) - 돋움 폰트 */
+html, body { margin: 0; padding: 0; background: #fff; }
+#dcb, #dcb * { font-family: "돋움", Dotum, "Apple SD Gothic Neo", AppleGothic, sans-serif; box-sizing: border-box; }
+#dcb { max-width: 860px; margin: 0 auto; padding: 0 8px 30px; font-size: 12px; line-height: 1.6; color: #333; }
+#dcb a { color: #333; text-decoration: none; cursor: pointer; }
+#dcb a:hover { text-decoration: underline; }
+#dcb h2, #dcb h3, #dcb h4 { margin: 0; padding: 0; }
+#dcb table { width: 100%; border-collapse: collapse; }
+#dcb input[type=text], #dcb input[type=password], #dcb select, #dcb textarea {
+  border: 1px solid #ccc; padding: 4px 6px; font-size: 12px; background: #fff; border-radius: 0; color: #333;
+}
+.head { border-top: 2px solid #29367c; padding: 14px 0 0; margin-bottom: 10px; }
+.title { font-size: 20px; font-weight: bold; margin-bottom: 10px !important; }
+.title a { color: #29367c !important; }
+.tabs { list-style: none; margin: 0; padding: 0; display: flex; border-bottom: 1px solid #29367c; }
+.tabs li { margin: 0 4px -1px 0; }
+.tabs a { display: block; padding: 6px 16px; border: 1px solid #ccc; border-bottom: 0; background: #f3f3f3; font-weight: bold; }
+.tabs li.on a { background: #fff; border-color: #29367c; color: #29367c !important; }
+.msg { background: #fff8e1; border: 1px solid #f0d77a; padding: 8px 12px; margin-bottom: 10px; color: #7a5b00; }
+.empty { text-align: center; padding: 40px 0; color: #888; }
+.sub { margin: 26px 0 6px !important; font-size: 13px; color: #29367c; }
+
+.list { border-top: 1px solid #29367c; }
+.list th { background: #f9f9f9; border-bottom: 1px solid #ddd; padding: 6px 4px; font-weight: normal; color: #555; text-align: center; }
+.list td { padding: 6px 4px; border-bottom: 1px solid #eee; text-align: center; vertical-align: middle; }
+.list .c_num { width: 60px; color: #888; }
+.list .c_writer { width: 130px; }
+.list .c_date { width: 60px; color: #888; }
+.list .c_cnt, .list .c_rec { width: 50px; color: #888; }
+.list .c_rec.hot { color: #d00; font-weight: bold; }
+.list td.c_tit { text-align: left; padding-left: 8px; }
+.list td.c_tit a { color: #000; }
+.list .reply { color: #2b5fa4; font-size: 11px; }
+.list .newmark { color: #fff; background: #e03; font-size: 9px; padding: 0 3px; border-radius: 2px; }
+.list tr.cur { background: #eef3fb; }
+.list tr:hover { background: #fafafa; }
+.ip { color: #888; font-size: 11px; margin-left: 2px; }
+
+.btns { margin: 10px 0; text-align: right; }
+.btns.split { display: flex; justify-content: space-between; align-items: center; }
+.btn_blue, .btn_gray { display: inline-block; padding: 5px 14px; font-size: 12px; line-height: 1.4; cursor: pointer; border-radius: 0; vertical-align: middle; text-decoration: none !important; }
+.btn_blue { background: #29367c; color: #fff !important; border: 1px solid #29367c; }
+.btn_blue:hover { background: #1f2a63; }
+.btn_gray { background: #fff; color: #333 !important; border: 1px solid #ccc; }
+.btn_gray:hover { background: #f3f3f3; }
+
+.pager { text-align: center; margin: 14px 0; }
+.pager a, .pager em { display: inline-block; min-width: 26px; padding: 3px 7px; margin: 0 1px; border: 1px solid transparent; font-style: normal; }
+.pager a:hover { border-color: #ccc; text-decoration: none !important; }
+.pager em { border-color: #29367c; color: #29367c; font-weight: bold; }
+.search { text-align: center; margin: 14px 0 6px; }
+.search input[type=text] { width: 180px; }
+
+.view { border-top: 1px solid #29367c; }
+.v_head { background: #f9f9f9; border-bottom: 1px solid #ddd; padding: 10px 12px; }
+.v_title { font-size: 15px; font-weight: bold; margin-bottom: 6px !important; color: #000; }
+.v_info { display: flex; justify-content: space-between; color: #888; font-size: 11px; flex-wrap: wrap; gap: 4px; }
+.v_info .date { margin-left: 6px; }
+.v_body { padding: 20px 12px; min-height: 160px; font-size: 13px; line-height: 1.8; color: #000; word-break: break-all; overflow-wrap: anywhere; }
+.v_vote { display: flex; justify-content: center; gap: 14px; padding: 14px 0 22px; border-bottom: 1px solid #ddd; }
+.vote { width: 96px; padding: 10px 0; background: #fff; cursor: pointer; font-size: 12px; font-weight: bold; border-radius: 0; line-height: 1.4; }
+.vote .n { display: block; font-size: 20px; }
+.vote_up { border: 2px solid #d33; color: #d33; }
+.vote_up:hover { background: #fff0f0; }
+.vote_down { border: 2px solid #3a6fd0; color: #3a6fd0; }
+.vote_down:hover { background: #f0f5ff; }
+
+.comments { margin-top: 10px; border-top: 1px solid #ccc; }
+.c_head { background: #f9f9f9; padding: 8px 12px; border-bottom: 1px solid #ddd; }
+.c_head b { color: #d00; }
+.comments ul { list-style: none; margin: 0; padding: 0; }
+.comments li { padding: 8px 12px; border-bottom: 1px solid #eee; }
+.comments li.c_none { text-align: center; color: #999; padding: 18px; }
+.c_top { margin-bottom: 3px; }
+.c_top .date { color: #888; margin-left: 6px; }
+.c_top .del { color: #888; margin-left: 8px; font-size: 11px; }
+.c_txt { color: #000; word-break: break-all; overflow-wrap: anywhere; }
+.c_form { background: #fafafa; border-bottom: 1px solid #ddd; padding: 10px 12px; }
+.c_who { margin-bottom: 6px; }
+.c_who input { width: 120px; }
+.c_form textarea { width: 100%; resize: vertical; }
+
+.f_tbl { border-top: 1px solid #29367c; border-bottom: 1px solid #ddd; }
+.f_tbl th { width: 80px; background: #f9f9f9; text-align: center; padding: 10px 4px; font-weight: bold; border-bottom: 1px solid #eee; vertical-align: top; }
+.f_tbl td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+.wfull { width: 100%; }
+.w150 { width: 150px; }
+.sp { margin: 0 6px 0 14px; font-weight: bold; }
+.f_tbl textarea { resize: vertical; line-height: 1.7; }
+.foot { margin-top: 24px; text-align: center; color: #999; font-size: 11px; }
+.foot a { color: #888 !important; margin: 0 6px; }
+
+@media (max-width: 640px) {
+  .list .c_date, .list .c_cnt, .list th:nth-child(4), .list th:nth-child(5) { display: none; }
+  .list .c_num { width: 44px; }
+  .list .c_writer { width: 90px; }
+  .search input[type=text] { width: 120px; }
+  .f_tbl th { width: 56px; }
+  .w150 { width: 100px; }
+}
+</style>
+</head>
+<body>
+<div id="dcb"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ===== 설정 ===== */
+  var BOARD_TITLE = '자유 갤러리';
+  var PER_PAGE    = 20;
+  var BEST_LIMIT  = 10;          // 개념글 기준 추천 수
+  var ADMIN_PW    = 'admin1234'; // 관리자 비밀번호: 모든 글/댓글 삭제 가능 (꼭 바꾸세요!)
+  var STORE_KEY   = 'dcb_v1';
+
+  var root = document.getElementById('dcb');
+  var db = load();
+  var flash = '';
+
+  /* ===== 저장소 ===== */
+  function hashPw(s) { // 간단 해시 (보안용 아님)
+    var h = 5381, i;
+    for (i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
+    return 'h' + (h >>> 0).toString(36);
+  }
+  function load() {
+    try {
+      var d = JSON.parse(localStorage.getItem(STORE_KEY));
+      if (d && d.posts) return d;
+    } catch (e) {}
+    var now = Date.now();
+    var d2 = { seq: 2, cseq: 1, posts: [
+      { id: 2, title: '개념글 기준은 추천 10개입니다', content: '추천을 10개 이상 받으면 개념글 탭에 올라갑니다.\n자유롭게 글 남겨보세요.', nick: '운영자', pw: hashPw(ADMIN_PW), ip: '', date: now - 3600000, views: 12, up: 11, down: 0, comments: [{ id: 1, nick: 'ㅇㅇ', ip: '121.88', pw: '', text: '첫 댓글', date: now - 1800000 }] },
+      { id: 1, title: '게시판 이용 안내', content: '이 게시판은 닉네임+비밀번호로 글과 댓글을 쓸 수 있습니다.', nick: '운영자', pw: hashPw(ADMIN_PW), ip: '', date: now - 7200000, views: 5, up: 1, down: 0, comments: [] }
+    ] };
+    return d2;
+  }
+  function save() { localStorage.setItem(STORE_KEY, JSON.stringify(db)); }
+  function myIp() {
+    var v = localStorage.getItem('dcb_ip');
+    if (!v) { v = (Math.floor(Math.random() * 200) + 20) + '.' + (Math.floor(Math.random() * 250) + 1); localStorage.setItem('dcb_ip', v); }
+    return v;
+  }
+  function voted() { try { return JSON.parse(localStorage.getItem('dcb_voted')) || {}; } catch (e) { return {}; } }
+
+  /* ===== 유틸 ===== */
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function body(s) {
+    return esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>').replace(/\n/g, '<br>');
+  }
+  function p2(n) { return n < 10 ? '0' + n : '' + n; }
+  function fdate(ts, full) {
+    var d = new Date(ts), t = new Date();
+    if (full) return d.getFullYear() + '.' + p2(d.getMonth() + 1) + '.' + p2(d.getDate()) + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds());
+    if (d.toDateString() === t.toDateString()) return p2(d.getHours()) + ':' + p2(d.getMinutes());
+    return p2(d.getMonth() + 1) + '.' + p2(d.getDate());
+  }
+  function writer(nick, ip) { return esc(nick) + (ip ? '<span class="ip">(' + esc(ip) + ')</span>' : ''); }
+  function findPost(id) { for (var i = 0; i < db.posts.length; i++) { if (db.posts[i].id === id) return db.posts[i]; } return null; }
+  function ok(item, pw) { return pw === ADMIN_PW || (item.pw && item.pw === hashPw(pw)); }
+  function go(h) { if (location.hash === h) { render(); } else { location.hash = h; } }
+  function lsGet(k) { return localStorage.getItem(k) || ''; }
+
+  /* ===== 라우팅 ===== */
+  function parse() {
+    var raw = location.hash.slice(1) || '/list';
+    var parts = raw.split('?');
+    return { seg: parts[0].split('/').filter(Boolean), q: new URLSearchParams(parts[1] || '') };
+  }
+  function qs(o) {
+    var a = [], k;
+    for (k in o) { if (o[k]) a.push(k + '=' + encodeURIComponent(o[k])); }
+    return a.length ? '?' + a.join('&') : '';
+  }
+
+  function render() {
+    var r = parse(), seg = r.seg, best = r.q.get('best') === '1';
+    var html = '<div class="head"><h2 class="title"><a href="#/list">' + esc(BOARD_TITLE) + '</a></h2><ul class="tabs">' +
+      '<li class="' + (!best && seg[0] !== 'view' ? 'on' : '') + '"><a href="#/list">전체글</a></li>' +
+      '<li class="' + (best ? 'on' : '') + '"><a href="#/list?best=1">개념글</a></li></ul></div>';
+    if (flash) { html += '<div class="msg">' + esc(flash) + '</div>'; flash = ''; }
+
+    if (seg[0] === 'view' && seg[1]) html += viewPage(parseInt(seg[1], 10));
+    else if (seg[0] === 'write') html += formPage(0);
+    else if (seg[0] === 'edit' && seg[1]) html += formPage(parseInt(seg[1], 10));
+    else html += listPage(r.q);
+
+    html += '<div class="foot"><a data-act="export">백업 내보내기</a>|<a data-act="import">백업 불러오기</a></div>';
+    root.innerHTML = html;
+    window.scrollTo(0, 0);
+  }
+
+  /* ===== 목록 ===== */
+  function listPage(q, curId) {
+    var best = q.get('best') === '1', s = (q.get('s') || '').trim().toLowerCase(), t = q.get('t') === 'nick' ? 'nick' : 'all';
+    var page = Math.max(1, parseInt(q.get('page'), 10) || 1);
+    var items = db.posts.filter(function (p) {
+      if (best && p.up < BEST_LIMIT) return false;
+      if (s) {
+        if (t === 'nick') return p.nick.toLowerCase().indexOf(s) > -1;
+        return (p.title + ' ' + p.content).toLowerCase().indexOf(s) > -1;
+      }
+      return true;
+    }).sort(function (a, b) { return b.id - a.id; });
+    var total = items.length, max = Math.max(1, Math.ceil(total / PER_PAGE));
+    if (page > max) page = max;
+    var slice = items.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+    var h = '<table class="list"><colgroup><col class="c_num"><col><col class="c_writer"><col class="c_date"><col class="c_cnt"><col class="c_rec"></colgroup>' +
+      '<thead><tr><th>번호</th><th>제목</th><th>글쓴이</th><th>작성일</th><th>조회</th><th>추천</th></tr></thead><tbody>';
+    if (!slice.length) h += '<tr><td colspan="6" class="empty">등록된 게시글이 없습니다.</td></tr>';
+    slice.forEach(function (p, i) {
+      var isNew = Date.now() - p.date < 86400000;
+      h += '<tr class="' + (p.id === curId ? 'cur' : '') + '"><td class="c_num">' + (total - (page - 1) * PER_PAGE - i) + '</td>' +
+        '<td class="c_tit"><a href="#/view/' + p.id + '">' + esc(p.title) + '</a>' +
+        (p.comments.length ? ' <span class="reply">[' + p.comments.length + ']</span>' : '') +
+        (isNew ? ' <span class="newmark">N</span>' : '') + '</td>' +
+        '<td class="c_writer">' + writer(p.nick, p.ip) + '</td>' +
+        '<td class="c_date" title="' + fdate(p.date, true) + '">' + fdate(p.date) + '</td>' +
+        '<td class="c_cnt">' + p.views + '</td>' +
+        '<td class="c_rec' + (p.up >= BEST_LIMIT ? ' hot' : '') + '">' + p.up + '</td></tr>';
+    });
+    h += '</tbody></table><div class="btns"><a class="btn_blue" href="#/write">글쓰기</a></div>';
+
+    if (max > 1) {
+      var st = Math.floor((page - 1) / 10) * 10 + 1, en = Math.min(max, st + 9), base = { best: best ? '1' : '', s: q.get('s') || '', t: s ? t : '' };
+      var lk = function (n) { var o = {}; for (var k in base) o[k] = base[k]; o.page = n; return '#/list' + qs(o); };
+      h += '<div class="pager">';
+      if (st > 1) h += '<a href="' + lk(st - 1) + '">&lt; 이전</a>';
+      for (var n = st; n <= en; n++) h += n === page ? '<em>' + n + '</em>' : '<a href="' + lk(n) + '">' + n + '</a>';
+      if (en < max) h += '<a href="' + lk(en + 1) + '">다음 &gt;</a>';
+      h += '</div>';
+    }
+    h += '<form class="search" data-form="search"><select name="t"><option value="all"' + (t === 'all' ? ' selected' : '') + '>제목+내용</option><option value="nick"' + (t === 'nick' ? ' selected' : '') + '>글쓴이</option></select> ' +
+      '<input type="text" name="s" value="' + esc(q.get('s') || '') + '"> <button type="submit" class="btn_gray">검색</button>' +
+      (best ? '<input type="hidden" name="best" value="1">' : '') + '</form>';
+    return h;
+  }
+
+  /* ===== 글 보기 ===== */
+  function viewPage(id) {
+    var p = findPost(id);
+    if (!p) return '<div class="empty">존재하지 않거나 삭제된 게시글입니다.</div>';
+    var sk = 'dcb_seen_' + id;
+    if (!sessionStorage.getItem(sk)) { sessionStorage.setItem(sk, '1'); p.views++; save(); }
+
+    var h = '<div class="view"><div class="v_head"><h3 class="v_title">' + esc(p.title) + '</h3><div class="v_info"><span>' +
+      writer(p.nick, p.ip) + '<span class="date">' + fdate(p.date, true) + '</span></span><span>조회 ' + p.views + ' | 추천 ' + p.up + ' | 댓글 ' + p.comments.length + '</span></div></div>' +
+      '<div class="v_body">' + body(p.content) + '</div>' +
+      '<div class="v_vote"><button class="vote vote_up" data-act="vote" data-id="' + id + '" data-type="up"><span class="n">' + p.up + '</span>추천</button>' +
+      '<button class="vote vote_down" data-act="vote" data-id="' + id + '" data-type="down"><span class="n">' + p.down + '</span>비추천</button></div></div>' +
+      '<div class="btns split"><span><a class="btn_gray" href="#/list">목록</a></span><span>' +
+      '<a class="btn_gray" href="#/edit/' + id + '">수정</a> <a class="btn_gray" data-act="del" data-id="' + id + '">삭제</a> <a class="btn_blue" href="#/write">글쓰기</a></span></div>';
+
+    h += '<div class="comments" id="comments"><div class="c_head">전체 댓글 <b>' + p.comments.length + '</b>개</div><ul>';
+    if (!p.comments.length) h += '<li class="c_none">첫 댓글을 남겨보세요.</li>';
+    p.comments.forEach(function (c) {
+      h += '<li><div class="c_top">' + writer(c.nick, c.ip) + '<span class="date">' + fdate(c.date, true) + '</span>' +
+        '<a class="del" data-act="cdel" data-id="' + id + '" data-cid="' + c.id + '">삭제</a></div><div class="c_txt">' + body(c.text) + '</div></li>';
+    });
+    h += '</ul><form class="c_form" data-form="comment" data-id="' + id + '"><div class="c_who"><input type="text" name="nick" maxlength="20" placeholder="닉네임" value="' + esc(lsGet('dcb_nick')) + '"> ' +
+      '<input type="password" name="pw" placeholder="비밀번호"></div><textarea name="text" rows="3" maxlength="400" placeholder="댓글을 입력하세요 (400자)"></textarea>' +
+      '<div class="btns"><button type="submit" class="btn_blue">등록</button></div></form></div>';
+
+    h += '<h4 class="sub">목록</h4>' + listPage(new URLSearchParams(''), id);
+    return h;
+  }
+
+  /* ===== 글쓰기/수정 ===== */
+  function formPage(id) {
+    var p = id ? findPost(id) : null;
+    if (id && !p) return '<div class="empty">존재하지 않는 게시글입니다.</div>';
+    var h = '<form data-form="write" data-id="' + (id || 0) + '"><table class="f_tbl">';
+    if (!id) {
+      h += '<tr><th>닉네임</th><td><input type="text" name="nick" maxlength="20" class="w150" value="' + esc(lsGet('dcb_nick')) + '"> <span class="sp">비밀번호</span> <input type="password" name="pw" class="w150" placeholder="4자 이상"></td></tr>';
+    } else {
+      h += '<tr><th>비밀번호</th><td><input type="password" name="pw" class="w150"></td></tr>';
+    }
+    h += '<tr><th>제목</th><td><input type="text" name="title" maxlength="100" class="wfull" value="' + esc(p ? p.title : '') + '"></td></tr>' +
+      '<tr><th>내용</th><td><textarea name="content" rows="14" class="wfull">' + esc(p ? p.content : '') + '</textarea></td></tr></table>' +
+      '<div class="btns split"><span><a class="btn_gray" href="' + (id ? '#/view/' + id : '#/list') + '">취소</a></span>' +
+      '<span><button type="submit" class="btn_blue">' + (id ? '수정' : '등록') + '</button></span></div></form>';
+    return h;
+  }
+
+  /* ===== 이벤트 ===== */
+  root.addEventListener('submit', function (e) {
+    var f = e.target, kind = f.getAttribute('data-form');
+    if (!kind) return;
+    e.preventDefault();
+    var v = function (n) { return f.elements[n] ? f.elements[n].value : ''; };
+
+    if (kind === 'search') {
+      var o = { s: v('s').trim(), t: v('t'), best: v('best') };
+      go('#/list' + qs(o));
+      return;
+    }
+    if (kind === 'write') {
+      var id = parseInt(f.getAttribute('data-id'), 10), title = v('title').trim(), content = v('content').trim(), pw = v('pw');
+      if (!title || !content) { alert('제목과 내용을 입력하세요.'); return; }
+      if (id) {
+        var p = findPost(id);
+        if (!p || !ok(p, pw)) { alert('비밀번호가 맞지 않습니다.'); return; }
+        p.title = title; p.content = content; save(); flash = '수정되었습니다.'; go('#/view/' + id);
+        return;
+      }
+      var nick = v('nick').trim();
+      if (!nick) { alert('닉네임을 입력하세요.'); return; }
+      if (pw.length < 4) { alert('비밀번호를 4자 이상 입력하세요.'); return; }
+      localStorage.setItem('dcb_nick', nick);
+      db.seq++;
+      db.posts.push({ id: db.seq, title: title, content: content, nick: nick, pw: hashPw(pw), ip: myIp(), date: Date.now(), views: 0, up: 0, down: 0, comments: [] });
+      save(); flash = '등록되었습니다.'; go('#/view/' + db.seq);
+      return;
+    }
+    if (kind === 'comment') {
+      var pid = parseInt(f.getAttribute('data-id'), 10), post = findPost(pid), text = v('text').trim(), cn = v('nick').trim(), cpw = v('pw');
+      if (!post) return;
+      if (!text) { alert('댓글 내용을 입력하세요.'); return; }
+      if (!cn) { alert('닉네임을 입력하세요.'); return; }
+      if (cpw.length < 4) { alert('비밀번호를 4자 이상 입력하세요.'); return; }
+      localStorage.setItem('dcb_nick', cn);
+      db.cseq = (db.cseq || 0) + 1;
+      post.comments.push({ id: db.cseq, nick: cn, ip: myIp(), pw: hashPw(cpw), text: text, date: Date.now() });
+      save(); render();
+      var el = document.getElementById('comments'); if (el) el.scrollIntoView();
+    }
+  });
+
+  root.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!a) return;
+    var act = a.getAttribute('data-act'), id = parseInt(a.getAttribute('data-id'), 10);
+
+    if (act === 'vote') {
+      var vt = voted();
+      if (vt[id]) { flash = '이미 투표하셨습니다.'; render(); return; }
+      var p = findPost(id); if (!p) return;
+      p[a.getAttribute('data-type') === 'down' ? 'down' : 'up']++;
+      vt[id] = 1; localStorage.setItem('dcb_voted', JSON.stringify(vt));
+      save(); flash = '투표되었습니다.'; render();
+    } else if (act === 'del') {
+      var pw = prompt('비밀번호를 입력하세요.'); if (pw === null) return;
+      var post = findPost(id);
+      if (!post || !ok(post, pw)) { alert('비밀번호가 맞지 않습니다.'); return; }
+      db.posts = db.posts.filter(function (x) { return x.id !== id; });
+      save(); flash = '삭제되었습니다.'; go('#/list');
+    } else if (act === 'cdel') {
+      var cid = parseInt(a.getAttribute('data-cid'), 10), pw2 = prompt('비밀번호를 입력하세요.'); if (pw2 === null) return;
+      var pp = findPost(id); if (!pp) return;
+      var c = pp.comments.filter(function (x) { return x.id === cid; })[0];
+      if (!c || !ok(c, pw2)) { alert('비밀번호가 맞지 않습니다.'); return; }
+      pp.comments = pp.comments.filter(function (x) { return x.id !== cid; });
+      save(); render();
+    } else if (act === 'export') {
+      var blob = new Blob([JSON.stringify(db)], { type: 'application/json' });
+      var l = document.createElement('a'); l.href = URL.createObjectURL(blob); l.download = 'dc-board-backup.json'; l.click();
+    } else if (act === 'import') {
+      var inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+      inp.onchange = function () {
+        var fr = new FileReader();
+        fr.onload = function () {
+          try {
+            var d = JSON.parse(fr.result);
+            if (!d || !d.posts) throw 0;
+            if (!confirm('현재 데이터를 백업 파일 내용으로 교체합니다. 계속할까요?')) return;
+            db = d; save(); flash = '불러왔습니다.'; go('#/list');
+          } catch (er) { alert('올바른 백업 파일이 아닙니다.'); }
+        };
+        if (inp.files[0]) fr.readAsText(inp.files[0]);
+      };
+      inp.click();
+    }
+  });
+
+  window.addEventListener('hashchange', render);
+  render();
+})();
+</script>
+</body>
+</html>
